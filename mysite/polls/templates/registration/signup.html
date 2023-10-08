@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <!-- Include necessary CSS and styling for your black theme -->
+</head>
+<body>
+    <style>
+        body {
+            background-image: url('/static/nasa.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            color: black;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative; /* Add this line */
+        }
+
+        /* Rest of your CSS remains the same */
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px 20px 30px; /* Add more padding to the top */
+            border: 1px solid #333;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+            text-align: center; /* Center-align the form elements */
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            color: white; /* Add white color to labels */
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 90%;
+            padding: 10px;
+            margin-top: 6px;
+            margin-bottom: 12px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: white;
+            color: #333; /* You can change the text color to black or any other color */
+            font-size: 16px;
+            text-align: center; /* Center-align the text inside input fields */
+        }
+
+        button {
+            width: 90%; /* Adjust button width */
+            padding: 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 0 auto; /* Center-align the button */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Increase transparency */
+            z-index: -1;
+        }
+    </style>
+        <div class="overlay"></div>
+
+        <div class="container">
+            <h1 style="color: white;">Create an Account</h1>
+            <form method="post" action="{% url 'signup' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}" style="color: white;">Username:</label>
+                    {{ form.username }}
+                    <span style="color: white;">{{ form.username.errors }}</span> <!-- Apply white color to error messages -->
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}" style="color: white;">Password:</label>
+                    {{ form.password1 }}
+                    <span style="color: white;">{{ form.password1.errors }}</span> <!-- Apply white color to error messages -->
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}" style="color: white;">Confirm Password:</label>
+                    {{ form.password2 }}
+                    <span style="color: white;">{{ form.password2.errors }}</span> <!-- Apply white color to error messages -->
+                </div>
+                <button type="submit" name="register">Sign Up</button>
+            </form>
+            <br/>
+            <a href="{% url 'custom_login' %}" class="btn btn-primary" style="color: white;">Back to Login</a>
+        </div>
+            
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!-- qa/templates/qa/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA App</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom CSS for black theme */
+        body {
+            background-color: #000;
+            color: #fff;
+        }
+        .chat-container {
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 20px;    }
+        .user-message {
+            background-color: #333;
+            color: #fff;
+            border-radius: 10px;
+        }
+        .assistant-message {
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Question and Answer</h1>
+        <div class="chat-container mt-4" id="chat-container">
+            {% for qa in qas %}
+                <div class="message {% if forloop.counter0|divisibleby:2 %}user-message{% else %}assistant-message{% endif %}">
+                    {{ qa.prompt }}
+                </div>
+                <div class="message {% if forloop.counter0|divisibleby:2 %}assistant-message{% else %}user-message{% endif %}">
+                    {{ qa.answer }}
+                </div>
+            {% endfor %}
+        </div>
+        <form method="post"  id="prompt-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.prompt.id_for_label }}">Enter Prompt:</label>
+                <textarea style="border-radius: 10px; background-color: #40414F; color: #fff;" class="form-control" id="{{ form.prompt.id_for_label }}" name="{{ form.prompt.name }}" rows="2" cols="40" placeholder="Send a message">{{ form.prompt.value }}</textarea>
+            </div>
+        </form>
+        
+    </div>
+
+    <!-- Include Bootstrap JS and jQuery (for Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
+
+    <script>
+        // Function to send prompt data to the server via AJAX
+        function sendPrompt() {
+            const promptTextarea = $('#{{ form.prompt.id_for_label }}');
+            const promptValue = promptTextarea.val().trim();
+    
+            if (!promptValue) {
+                return; // Do not send empty prompts
+            }
+    
+            // Send the AJAX request
+            $.ajax({
+                type: 'POST',
+                url: '{% url "get_answer" %}',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    prompt: promptValue
+                },
+                success: function(response) {
+                    // Handle the response, e.g., update the chat container
+                    const chatContainer = $('#chat-container');
+                    chatContainer.append(`<div class="message user-message">${promptValue}</div>`);
+                    chatContainer.append(`<div class="message assistant-message">${response}</div>`);
+    
+                    // Clear the prompt textarea
+                    promptTextarea.val('');
+                }
+            });
+        }
+    
+        // Attach the keydown event listener to the textarea to listen for Enter key
+        $('#{{ form.prompt.id_for_label }}').keydown(function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Prevent the Enter key from adding a new line in the textarea
+                sendPrompt(); // Call the sendPrompt function to submit the prompt
+            }
+        });
+    </script>
+    
+</body>
+</html>

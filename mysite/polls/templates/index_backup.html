@@ -1,0 +1,131 @@
+<!-- qa/templates/qa/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA App</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom CSS for black theme */
+        body {
+            background-color: #000;
+            color: #fff;
+        }
+        .chat-container {
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 20px;    }
+        .user-message {
+            background-color: #333;
+            color: #fff;
+            border-radius: 10px;
+        }
+        .assistant-message {
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Add this code at the beginning of your HTML body -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">NASA</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'custom_logout' %}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    <div class="container">
+        <h1 class="mt-5">Question and Answer</h1>
+        <div class="chat-container mt-4" id="chat-container">
+      
+        </div>
+        <form method="post"  id="prompt-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.prompt.id_for_label }}">Enter Prompt:</label>
+                <textarea style="border-radius: 10px; background-color: #40414F; color: #fff;" class="form-control" id="{{ form.prompt.id_for_label }}" name="{{ form.prompt.name }}" rows="2" cols="40" placeholder="Send a message">{{ form.prompt.value }}</textarea>
+            </div>
+        </form>
+        
+    </div>
+
+    <!-- Include Bootstrap JS and jQuery (for Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
+
+    <script>
+        // Function to send prompt data to the server via AJAX
+        function sendPrompt() {
+            const promptTextarea = $('#{{ form.prompt.id_for_label }}');
+            const promptValue = promptTextarea.val().trim();
+    
+            if (!promptValue) {
+                return; // Do not send empty prompts
+            }
+    
+            // Send the AJAX request
+            $.ajax({
+                type: 'POST',
+                url: '{% url "get_answer" %}',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    prompt: promptValue
+                },
+                dataType: 'json', // Specify that you expect JSON data
+                success: function(response) {
+                    if (response.answer) {
+                        // Extract the answer from the response object
+                        const answer = response.answer;
+            
+                        // Handle the response by appending to the chat container
+                        const chatContainer = $('#chat-container');
+                        chatContainer.append(`<div class="message user-message">${promptValue}</div>`);
+                        chatContainer.append(`<div class="message assistant-message">${answer}</div>`);
+            
+                        // Clear the prompt textarea
+                        promptTextarea.val('');
+                    } else {
+                        // Handle the case where the response does not contain an answer
+                        console.error('No answer received');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Handle AJAX errors
+                    console.error('AJAX Error:', error);
+                }
+            });
+        }
+    
+        // Attach the keydown event listener to the textarea to listen for Enter key
+        $('#{{ form.prompt.id_for_label }}').keydown(function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Prevent the Enter key from adding a new line in the textarea
+                sendPrompt(); // Call the sendPrompt function to submit the prompt
+            }
+        });
+    </script>
+    
+</body>
+</html>
